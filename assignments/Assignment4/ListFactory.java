@@ -3,10 +3,22 @@
  * Implements the factory method pattern (https://en.wikipedia.org/wiki/Factory_method_pattern)
  * for lists in this assignment.
  *
- * @author Dillon (djt0026@auburn.edu)
+ * @author Dillon Thompson (djt0026@auburn.edu)
  * @author Dean Hendrix (dh@auburn.edu)
  * @version TODAY
  */
+public class RandomArray<T> implements RandomizedList<T> {
+   private T[] elements;
+   private int size;
+
+   public RandomArray() {
+      
+   }
+}
+public class DoublyLinkedList<T> implements DoubleEndedList<T> {
+
+}
+
 public class ListFactory {
 
    /**
