@@ -1,4 +1,6 @@
-import java.util.Arrays;
+import java.rmi.server.ObjID;
+
+import sun.security.util.Length;
 
 /**
  * ListFactory.java.
@@ -31,10 +33,26 @@ public class RandomArray<T> implements RandomizedList<T> {
       elements[size] = element;
       size++;
    }
-//have to do this with for loop. get rid of arrays import because it's not allowed.
+
    private void resize(int capacity) {
-      T[] copy = Arrays.<T>copyOf(elements, capacity);
+      T[] copy = (T[]) new Object[capacity];
+      for (int i = 0; i < elements.length; i++) {
+         copy[i] = elements[i];
+      }
       elements = copy;
+   }
+
+   public T remove(T element) {
+      if (elements.length == 0) {
+         return null;
+      }
+      if (size > 0 && size < elements.length / 4) {
+         resize(elements.length / 2);
+      }
+      else {
+         elements[element] = elements[size - 1];
+         elements[size - 1] = null;
+      }
    }
 }
 public class DoublyLinkedList<T> implements DoubleEndedList<T> {
