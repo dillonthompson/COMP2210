@@ -31,7 +31,7 @@ public class RandomArray<T> implements RandomizedList<T> {
       elements[size] = element;
       size++;
    }
-
+//have to do this with for loop. get rid of arrays import because it's not allowed.
    private void resize(int capacity) {
       T[] copy = Arrays.<T>copyOf(elements, capacity);
       elements = copy;
