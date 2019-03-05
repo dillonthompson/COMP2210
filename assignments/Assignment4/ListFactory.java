@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * ListFactory.java.
  * Implements the factory method pattern (https://en.wikipedia.org/wiki/Factory_method_pattern)
@@ -8,11 +10,31 @@
  * @version TODAY
  */
 public class RandomArray<T> implements RandomizedList<T> {
+   private static final int DEFAULT_CAPACITY = 5;
    private T[] elements;
    private int size;
 
    public RandomArray() {
-      
+      this(DEFAULT_CAPACITY);
+   }
+
+   @SuppressWarnings("unchecked")
+   public RandomArray(int capacity) {
+      elements = (T[]) new Object[capacity];
+      size = 0;
+   }
+
+   public void add(T element) {
+      if (size == elements.length) {
+         resize(elements.length * 2);
+      }
+      elements[size] = element;
+      size++;
+   }
+
+   private void resize(int capacity) {
+      T[] copy = Arrays.<T>copyOf(elements, capacity);
+      elements = copy;
    }
 }
 public class DoublyLinkedList<T> implements DoubleEndedList<T> {
