@@ -1,3 +1,7 @@
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Random;
+
 import java.rmi.server.ObjID;
 
 import sun.security.util.Length;
@@ -12,7 +16,7 @@ import sun.security.util.Length;
  * @version TODAY
  */
 public class RandomArray<T> implements RandomizedList<T> {
-   private static final int DEFAULT_CAPACITY = 5;
+   private static final int DEFAULT_CAPACITY = 1;
    private T[] elements;
    private int size;
 
@@ -30,6 +34,9 @@ public class RandomArray<T> implements RandomizedList<T> {
       if (size == elements.length) {
          resize(elements.length * 2);
       }
+      if (element == null) {
+         throw new IllegalArgumentException("element cannot be null");
+      }
       elements[size] = element;
       size++;
    }
@@ -42,16 +49,66 @@ public class RandomArray<T> implements RandomizedList<T> {
       elements = copy;
    }
 
-   public T remove(T element) {
-      if (elements.length == 0) {
+   public T remove() {
+      int remove = new Random().nextInt(elements.size);
+      T removed = elements[remove];
+      if (elements.size == 0) {
          return null;
       }
       if (size > 0 && size < elements.length / 4) {
          resize(elements.length / 2);
       }
       else {
-         elements[element] = elements[size - 1];
-         elements[size - 1] = null;
+         elements[remove] = null;
+         return removed;
+      }
+   }
+
+   public T sample() {
+      int sample = new Random().nextInt(elements.size);
+      if (elements.size == 0) {
+         return null;
+      }
+      else {
+         return elements[sample];
+      }
+   }
+
+   public Iterator<T> iterator() {
+      Iterate itr = new Iterate(elements, size);
+      return itr;
+   }
+
+   private class Iterate<T> implements Iterator<T> {
+      private int count;
+      private T[] array;
+      private int current;
+
+      public Iterate(T[] a, int num) {
+         array = a;
+         count = num;
+         current = 0;
+      }
+
+      public boolean hasNext() {
+         if (current < size) {
+            return true;
+         }
+         else{
+            return false;
+         }
+      }
+
+      public T next() {
+         if (!hasNext()) {
+            return null;
+         }
+         else {
+            return array[current + 1];
+         }
+      }
+      public remove() {
+         throw new UnsupportedOperationException("this operation is not allowed");
       }
    }
 }
