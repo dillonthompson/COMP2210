@@ -125,7 +125,7 @@ public class ListFactory {
       // Replace the following return statement with one that returns
       // an instance of the class you wrote to implement the
       // RandomizedList interface.
-      return null;
+      return new RandomArray();
    }
 
    /**
