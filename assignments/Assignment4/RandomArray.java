@@ -1,4 +1,6 @@
 import java.rmi.server.ObjID;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import sun.security.util.Length;
 
@@ -45,7 +47,7 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public T remove() {
-      int remove = new Random().nextInt(elements.size);
+      int remove = new Random().nextInt(size);
       T removed = elements[remove];
       if (elements.size == 0) {
          return null;
@@ -60,7 +62,7 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public T sample() {
-      int sample = new Random().nextInt(elements.size);
+      int sample = new Random().nextInt(size);
       if (elements.size == 0) {
          return null;
       }
@@ -70,31 +72,29 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public Iterator<T> iterator() {
-      Iterate itr = new Iterate(elements);
-      return itr;
+       return new ArrayIterator(elements, size);
    }
 
-   private class Iterate<T> implements Iterator<T> {
-      private T[] array;
+   public class ArrayIterator<T> implements Iterator<T> {
+      private T[] items;
+      private int count;
       private int current;
 
-      public Iterate(T[] a) {
-         array = a;
+      public ArrayIterator(T[] elements,int size) {
+         for (int i = 0; i < size; i++) {
+             items[i] = elements[i];
+         }
+         count = size;
          current = 0;
       }
 
       public boolean hasNext() {
-         if (current < size) {
-            return true;
-         }
-         else{
-            return false;
-         }
+         return (current < count);
       }
 
       public T next() {
          if (!hasNext()) {
-            return null;
+            throw new NoSuchElementException("does not have next")
          }
          else {
             return array[current + 1];
