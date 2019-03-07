@@ -31,7 +31,7 @@ public class RandomArray<T> implements RandomizedList<T> {
       if (size == elements.length) {
          resize(elements.length * 2);
       }
-      if (element == null) {
+      if (elements == null) {
          throw new IllegalArgumentException("element cannot be null");
       }
       elements[size] = element;
@@ -47,28 +47,32 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public T remove() {
-      int remove = new Random().nextInt(size);
-      T removed = elements[remove];
-      if (elements.size == 0) {
+      int delete = new Random().nextInt(size);
+      T removed = elements[delete];
+      if (size == 0) {
          return null;
       }
       if (size > 0 && size < elements.length / 4) {
          resize(elements.length / 2);
       }
       else {
-         elements[remove] = null;
+         elements[delete] = null;
          return removed;
       }
    }
 
    public T sample() {
       int sample = new Random().nextInt(size);
-      if (elements.size == 0) {
+      if (size == 0) {
          return null;
       }
       else {
          return elements[sample];
       }
+   }
+
+   public boolean isEmpty() {
+       return (size > 0);
    }
 
    public Iterator<T> iterator() {
@@ -94,7 +98,7 @@ public class RandomArray<T> implements RandomizedList<T> {
 
       public T next() {
          if (!hasNext()) {
-            throw new NoSuchElementException("does not have next")
+            throw new NoSuchElementException("does not have next");
          }
          else {
             return array[current + 1];
