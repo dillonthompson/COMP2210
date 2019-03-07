@@ -107,7 +107,7 @@ public class RandomArray<T> implements RandomizedList<T> {
             return array[current + 1];
          }
       }
-      public remove() {
+      public void remove() {
          throw new UnsupportedOperationException("this operation is not allowed");
       }
    }
