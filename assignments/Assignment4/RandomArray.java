@@ -44,11 +44,11 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public T remove() {
-      int delete = new Random().nextInt(size - 1);
-      T removed = elements[delete];
       if (size == 0) {
          return null;
       }
+      int delete = new Random().nextInt(size - 1);
+      T removed = elements[delete];
       if (size > 0 && size < elements.length / 4) {
          resize(elements.length / 2);
       }
