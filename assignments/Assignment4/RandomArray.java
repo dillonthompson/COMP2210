@@ -24,17 +24,7 @@ public class RandomArray<T> implements RandomizedList<T> {
       size = 0;
    }
 
-   public void add(T element) {
-      if (size == elements.length) {
-         resize(elements.length * 2);
-      }
-      if (elements == null) {
-         throw new IllegalArgumentException("element cannot be null");
-      }
-      elements[size] = element;
-      size++;
-   }
-
+   @SuppressWarnings("unchecked")
    private void resize(int capacity) {
       T[] copy = (T[]) new Object[capacity];
       for (int i = 0; i < elements.length; i++) {
@@ -42,42 +32,55 @@ public class RandomArray<T> implements RandomizedList<T> {
       }
       elements = copy;
    }
+   public Iterator<T> iterator() {
+    
+    return new ArrayIterator(elements, size());
+}
+
+   public void add(T element) {
+    if (element == null) {
+        throw new IllegalArgumentException("element cannot be null");
+     }
+    if (isFull()) {
+         resize(elements.length * 2);
+      }
+      elements[size()] = element;
+      size++;
+   }
 
    public T remove() {
-      if (size == 0) {
+      if (isEmpty()) {
          return null;
       }
-      int delete = new Random().nextInt(size - 1);
+      int delete = new Random().nextInt(size());
       T removed = elements[delete];
-      if (size > 0 && size < elements.length / 4) {
-         resize(elements.length / 2);
-      }
-      else {
-        elements[delete] = elements[size - 1];
-        elements[size] = null;
-      }
-      return removed;
+      elements[delete] = elements[size() - 1];
+      elements[size() - 1] = null;
+      size--;
+      if (size() > 0 && size < elements.length / 4) {
+          resize(elements.length / 2);
+        }
+    return removed;
    }
 
    public T sample() {
-      int sample = new Random().nextInt(size);
-      if (size == 0) {
-         return null;
-      }
-      else {
-         return elements[sample];
-      }
+    if (isEmpty()) {
+        return null;
+     }
+      int sample = new Random().nextInt(size());
+      return elements[sample];
+   }
+
+   public boolean isFull() {
+       return size() == elements.length;
    }
 
    public boolean isEmpty() {
-       return (size == 0);
-   }
-   public int size() {
-       return size;
+       return size() == 0;
    }
 
-   public Iterator<T> iterator() {
-       return new ArrayIterator(elements, size);
+   public int size() {
+       return size;
    }
 
    public class ArrayIterator<T> implements Iterator<T> {
@@ -85,11 +88,9 @@ public class RandomArray<T> implements RandomizedList<T> {
       private int count;
       private int current;
 
-      public ArrayIterator(T[] elements,int size) {
-         for (int i = 0; i < size; i++) {
-            items[i] = elements[i];
-         }
+      public ArrayIterator(T[] elements, int size) {
          count = size;
+         items = elements;
          current = 0;
       }
 
@@ -98,10 +99,17 @@ public class RandomArray<T> implements RandomizedList<T> {
       }
 
       public T next() {
-         if (!hasNext()) {
-            throw new NoSuchElementException("does not have next");
-         }
-            return items[current + 1];
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        int next = new Random().nextInt(count);
+        T temp = items[next];
+        if (hasNext()) {
+            items[next] = items[count];
+            items[count] = temp;
+            count--;
+        }
+        return temp;
       }
       public void remove() {
          throw new UnsupportedOperationException();
