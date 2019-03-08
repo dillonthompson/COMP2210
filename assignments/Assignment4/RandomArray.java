@@ -1,9 +1,6 @@
-import java.rmi.server.ObjID;
+import java.util.Random;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import sun.security.util.Length;
-
 /**
  * RandomArray.java.
  * Implements the RandomizedList interface.
