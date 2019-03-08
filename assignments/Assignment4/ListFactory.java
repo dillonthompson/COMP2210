@@ -21,7 +21,7 @@ public class ListFactory {
       // Replace the following return statement with one that returns
       // an instance of the class you wrote to implement the
       // RandomizedList interface.
-      return new RandomArray();
+      return null;
    }
 
    /**
@@ -31,7 +31,7 @@ public class ListFactory {
       // Replace the following return statement with one that returns
       // an instance of the class you wrote to implement the
       // DoubleEndedList interface.
-      return null;
+      return new RandomList();
    }
 
 }

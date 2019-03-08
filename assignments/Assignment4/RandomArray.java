@@ -27,13 +27,12 @@ public class RandomArray<T> implements RandomizedList<T> {
    @SuppressWarnings("unchecked")
    private void resize(int capacity) {
       T[] copy = (T[]) new Object[capacity];
-      for (int i = 0; i < elements.length; i++) {
+      for (int i = 0; i < size(); i++) {
          copy[i] = elements[i];
       }
       elements = copy;
    }
    public Iterator<T> iterator() {
-    
     return new ArrayIterator(elements, size());
 }
 
@@ -45,7 +44,7 @@ public class RandomArray<T> implements RandomizedList<T> {
          resize(elements.length * 2);
       }
       elements[size()] = element;
-      size++;
+      size = size() + 1;
    }
 
    public T remove() {
@@ -56,11 +55,11 @@ public class RandomArray<T> implements RandomizedList<T> {
       T removed = elements[delete];
       elements[delete] = elements[size() - 1];
       elements[size() - 1] = null;
-      size--;
-      if (size() > 0 && size < elements.length / 4) {
+      size = size() - 1;
+      if (size() > 0 && size() < elements.length / 4) {
           resize(elements.length / 2);
-        }
-    return removed;
+      }
+      return removed;
    }
 
    public T sample() {
@@ -76,7 +75,7 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public boolean isEmpty() {
-       return size() == 0;
+       return (size() == 0);
    }
 
    public int size() {
@@ -89,7 +88,7 @@ public class RandomArray<T> implements RandomizedList<T> {
       private int current;
 
       public ArrayIterator(T[] elements, int size) {
-         count = size;
+         count = size();
          items = elements;
          current = 0;
       }
@@ -102,12 +101,12 @@ public class RandomArray<T> implements RandomizedList<T> {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        int next = new Random().nextInt(count);
-        T temp = items[next];
+        int rand = new Random().nextInt(count);
+        T temp = items[rand];
         if (hasNext()) {
-            items[next] = items[count];
-            items[count] = temp;
-            count--;
+           items[rand] = items[count - 1];
+           items[count - 1] = temp;
+           count--;
         }
         return temp;
       }
