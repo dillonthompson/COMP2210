@@ -53,7 +53,8 @@ public class RandomArray<T> implements RandomizedList<T> {
          resize(elements.length / 2);
       }
       else {
-         elements[delete] = null;
+        elements[delete] = elements[size - 1];
+        elements[size] = null;
       }
       return removed;
    }
@@ -100,12 +101,10 @@ public class RandomArray<T> implements RandomizedList<T> {
          if (!hasNext()) {
             throw new NoSuchElementException("does not have next");
          }
-         else {
             return items[current + 1];
-         }
       }
       public void remove() {
-         throw new UnsupportedOperationException("this operation is not allowed");
+         throw new UnsupportedOperationException();
       }
    }
 }
