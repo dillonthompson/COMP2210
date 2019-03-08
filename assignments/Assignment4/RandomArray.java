@@ -54,8 +54,8 @@ public class RandomArray<T> implements RandomizedList<T> {
       }
       else {
          elements[delete] = null;
-         return removed;
       }
+      return removed;
    }
 
    public T sample() {
@@ -70,6 +70,9 @@ public class RandomArray<T> implements RandomizedList<T> {
 
    public boolean isEmpty() {
        return (size > 0);
+   }
+   public int size() {
+       return size;
    }
 
    public Iterator<T> iterator() {
@@ -98,7 +101,7 @@ public class RandomArray<T> implements RandomizedList<T> {
             throw new NoSuchElementException("does not have next");
          }
          else {
-            return array[current + 1];
+            return items[current + 1];
          }
       }
       public void remove() {
