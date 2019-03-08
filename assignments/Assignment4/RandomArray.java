@@ -44,7 +44,7 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public T remove() {
-      int delete = new Random().nextInt(size);
+      int delete = new Random().nextInt(size - 1);
       T removed = elements[delete];
       if (size == 0) {
          return null;
@@ -69,7 +69,7 @@ public class RandomArray<T> implements RandomizedList<T> {
    }
 
    public boolean isEmpty() {
-       return (size > 0);
+       return (size == 0);
    }
    public int size() {
        return size;
@@ -86,7 +86,7 @@ public class RandomArray<T> implements RandomizedList<T> {
 
       public ArrayIterator(T[] elements,int size) {
          for (int i = 0; i < size; i++) {
-             items[i] = elements[i];
+            items[i] = elements[i];
          }
          count = size;
          current = 0;
