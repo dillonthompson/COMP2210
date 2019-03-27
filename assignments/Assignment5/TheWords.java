@@ -1,7 +1,14 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Scanner;
+import java.util.TreeSet;
 
 /**
  * Defines the methods needed to play a word search game.
@@ -11,9 +18,22 @@ import java.util.Scanner;
  * 
  */
 
-public class TheWords {
-     public TheWords() {
-         
+public class TheWords implements WordSearchGame {
+    private TreeSet<String> lexicon;
+    private String[][] board;
+    private boolean[][] visited;
+    private int length;
+    private int minLength;
+    private boolean loaded;
+    private int rows;
+    private int cols;
+    private int order;
+    int score;
+
+
+    public TheWords() {
+        lexicon = new TreeSet<String>();
+        score = 0;
      }
      /**
     * Loads the lexicon into a data structure for later use. 
@@ -22,8 +42,33 @@ public class TheWords {
     * @throws IllegalArgumentException if fileName is null
     * @throws IllegalArgumentException if fileName cannot be opened.
     */
-   void loadLexicon(String fileName) {
+   public void loadLexicon(String fileName) {
+       //check if file is null
+       if (fileName == null) {
+           throw new IllegalArgumentException("file name cannot be null");
+       }
 
+       //create file, bufferedreader, and scanner
+
+       File lex = new File(fileName);
+       BufferedReader br = new BufferedReader(lex);
+       Scanner sc = new Scanner(br);
+
+       //creates a string for words to be stored and added to tree
+       String word;
+
+       //read file into treeset
+       try {
+           //while word is not null add the word into the lexicon
+           while ((word = br.readLine()) != null) {
+               lexicon.add(word.toLowerCase());
+           }
+       }
+       //if file doesn't open
+       catch(Exception err) {
+           throw new IllegalArgumentException("file could not be opened");
+       }
+       loaded = true;
    }
    
    /**
@@ -38,8 +83,42 @@ public class TheWords {
     * @throws IllegalArgumentException if letterArray is null, or is  not
     *     square.
     */
-   void setBoard(String[] letterArray) {
+   public void setBoard(String[] letterArray) {
+       //variable for the square root of the length
+       double rt = Math.sqrt(letterArray.length);
+       
+       //check if it is null or a square
+       if (letterArray == null && rt % 1 != 0) {
+           throw new IllegalArgumentException("array is either null or not square");
+       }
 
+       //setting rows and cols for 2d array
+       rows = (int) rt;
+       cols = (int) rt;
+
+       //setting board dimensions
+       board = new String[rows][cols];
+       visited = new boolean[rows][cols];
+
+       //add letter array to the board
+       int x = 0;
+       int y = 0;
+
+       for (int i = 0; i < letterArray.length - 1; i++) {
+           //if x isn't at the last column then add it to that row
+           while (x <= cols) {
+               //check if x is at the last column. 
+               //if it is, set it back to 0 and increment the row
+               if (x == cols) {
+                   x = 0;
+                   y++;
+               }
+               //add the current letter to the current index of the board
+               board[y][x] = letterArray[i];
+               x++;
+           }
+           visited[y][x] = false;
+       }
    }
    
    /**
@@ -47,9 +126,8 @@ public class TheWords {
     *   standard out. Note that this method can always be called since
     *   implementing classes should have a default board.
     */
-   String getBoard() {
-       String lit = "Dillon";
-       return lit;
+   public String getBoard() {
+       
    }
    
    /**
@@ -63,7 +141,7 @@ public class TheWords {
     * @throws IllegalArgumentException if minimumWordLength < 1
     * @throws IllegalStateException if loadLexicon has not been called.
     */
-   SortedSet<String> getAllValidWords(int minimumWordLength) {
+   public SortedSet<String> getAllValidWords(int minimumWordLength) {
        return minimumWordLength;
    }
    
@@ -80,7 +158,7 @@ public class TheWords {
    * @throws IllegalArgumentException if minimumWordLength < 1
    * @throws IllegalStateException if loadLexicon has not been called.
    */  
-   int getScoreForWords(SortedSet<String> words, int minimumWordLength) {
+   public int getScoreForWords(SortedSet<String> words, int minimumWordLength) {
        return 0;
    }
    
@@ -92,7 +170,7 @@ public class TheWords {
     * @throws IllegalArgumentException if wordToCheck is null.
     * @throws IllegalStateException if loadLexicon has not been called.
     */
-   boolean isValidWord(String wordToCheck) {
+   public boolean isValidWord(String wordToCheck) {
        return false;
    }
    
@@ -105,7 +183,7 @@ public class TheWords {
     * @throws IllegalArgumentException if prefixToCheck is null.
     * @throws IllegalStateException if loadLexicon has not been called.
     */
-   boolean isValidPrefix(String prefixToCheck) {
+   public boolean isValidPrefix(String prefixToCheck) {
        return false;
    }
       
@@ -122,7 +200,7 @@ public class TheWords {
     * @throws IllegalArgumentException if wordToCheck is null.
     * @throws IllegalStateException if loadLexicon has not been called.
     */
-   List<Integer> isOnBoard(String wordToCheck) {
+   public List<Integer> isOnBoard(String wordToCheck) {
        List copy = new List();
        return copy;
    }
