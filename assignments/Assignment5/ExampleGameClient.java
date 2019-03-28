@@ -12,7 +12,7 @@ public class ExampleGameClient {
    /** Drives execution. */
    public static void main(String[] args) {
       WordSearchGame game = WordSearchGameFactory.createGame();
-      game.loadLexicon("wordfiles/words.txt");
+      game.loadLexicon("/Users/thompson/Documents/COMP 2210/COMP2210/assignments/Assignment5/wordfiles/words.txt");
       game.setBoard(new String[]{"E", "E", "C", "A", "A", "L", "E", "P", "H", 
                                  "N", "B", "O", "Q", "T", "T", "Y"});
       System.out.print("LENT is on the board at the following positions: ");

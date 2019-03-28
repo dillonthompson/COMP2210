@@ -1,8 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileNotFoundException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -48,26 +50,31 @@ public class TheWords implements WordSearchGame {
            throw new IllegalArgumentException("file name cannot be null");
        }
 
-       //create file, bufferedreader, and scanner
-
-       File lex = new File(fileName);
-       BufferedReader br = new BufferedReader(lex);
-       Scanner sc = new Scanner(br);
+       
+    //    Scanner sc = new Scanner(br);
 
        //creates a string for words to be stored and added to tree
        String word;
 
        //read file into treeset
        try {
+           //create file, bufferedreader, and scanner
+            File lex = new File(fileName);
+            FileReader fr = new FileReader(lex);
+            BufferedReader br = new BufferedReader(fr);
+
            //while word is not null add the word into the lexicon
            while ((word = br.readLine()) != null) {
                lexicon.add(word.toLowerCase());
            }
        }
        //if file doesn't open
-       catch(Exception err) {
-           throw new IllegalArgumentException("file could not be opened");
+       catch(FileNotFoundException err) {
+           System.out.println("File could not be opened");
        }
+       catch(Exception err) {
+            System.out.println("Something is wrong with your file.");
+        }
        loaded = true;
    }
    
@@ -84,9 +91,13 @@ public class TheWords implements WordSearchGame {
     *     square.
     */
    public void setBoard(String[] letterArray) {
+        //check if lexicon is loaded
+        if (loaded == false) {
+            throw new IllegalStateException();
+        }
        //variable for the square root of the length
        double rt = Math.sqrt(letterArray.length);
-       
+
        //check if it is null or a square
        if (letterArray == null && rt % 1 != 0) {
            throw new IllegalArgumentException("array is either null or not square");
@@ -106,10 +117,10 @@ public class TheWords implements WordSearchGame {
 
        for (int i = 0; i < letterArray.length - 1; i++) {
            //if x isn't at the last column then add it to that row
-           while (x <= cols) {
+           while (x <= cols - 1) {
                //check if x is at the last column. 
                //if it is, set it back to 0 and increment the row
-               if (x == cols) {
+               if (x == cols - 1) {
                    x = 0;
                    y++;
                }
@@ -127,7 +138,24 @@ public class TheWords implements WordSearchGame {
     *   implementing classes should have a default board.
     */
    public String getBoard() {
-       
+       //string to hold the string representation of the board
+       String result;
+
+       //make sure lexicon has been loaded
+       if (loaded == false) {
+            throw new IllegalStateException();
+        }
+
+        //create the string representation of the board
+        String lineSeperator = new System.lineSeperator();
+        StringBuilder sb = new StringBuilder();
+
+        for (String[] row : board) {
+            sb.append(Arrays.toString(row)).append(lineSeperator);
+        }
+        result = sb.toString();
+        //return the board
+       return result;
    }
    
    /**
