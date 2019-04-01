@@ -2,42 +2,48 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+
+
+
+
+
 /**
- * Defines the methods needed to play a word search game.
+ * Creates a word search game based on definitions from WordSearchGame.
  *
  * @author Dillon Thompson (djt0026@auburn.edu)
- * @version 2018-03-22
+ * @version 2019-03-26
  * 
  */
-
+ 
 public class TheWords implements WordSearchGame {
     private TreeSet<String> lexicon;
     private String[][] board;
     private boolean[][] visited;
+    private List<Integer> thePath;
     private int length;
-    private int minLength;
     private boolean loaded;
-    private int rows;
-    private int cols;
-    private int order;
-    int score;
-
-
-    public TheWords() {
-        lexicon = new TreeSet<String>();
-        score = 0;
-     }
-     /**
+    private int score;
+    private final int MAX_NEIGHBORS = 8;
+    private String wordSoFar;
+    private SortedSet<String> allValidWords;
+    private ArrayList<Position> positionPath;
+   
+   /**
+   * Constructor. Initializes default board.
+   */
+   public TheWords() {
+      lexicon = null;
+   }
+       
+    /**
     * Loads the lexicon into a data structure for later use. 
     * 
     * @param fileName A string containing the name of the file to be opened.
@@ -45,37 +51,35 @@ public class TheWords implements WordSearchGame {
     * @throws IllegalArgumentException if fileName cannot be opened.
     */
    public void loadLexicon(String fileName) {
-       //check if file is null
-       if (fileName == null) {
-           throw new IllegalArgumentException("file name cannot be null");
-       }
+      lexicon = new TreeSet<String>(); 
+      if (fileName == null) {
+          throw new IllegalArgumentException("file name cannot be null");
+      }
 
-       
-    //    Scanner sc = new Scanner(br);
+    //creates a string for words to be stored and added to tree
+    String word;
 
-       //creates a string for words to be stored and added to tree
-       String word;
+    //read file into treeset
+    try {
+        //create file, bufferedreader, and filereader
+         File lex = new File(fileName);
+         FileReader fr = new FileReader(lex);
+         BufferedReader br = new BufferedReader(fr);
 
-       //read file into treeset
-       try {
-           //create file, bufferedreader, and scanner
-            File lex = new File(fileName);
-            FileReader fr = new FileReader(lex);
-            BufferedReader br = new BufferedReader(fr);
-
-           //while word is not null add the word into the lexicon
-           while ((word = br.readLine()) != null) {
-               lexicon.add(word.toLowerCase());
-           }
-       }
-       //if file doesn't open
-       catch(FileNotFoundException err) {
-           System.out.println("File could not be opened");
-       }
-       catch(Exception err) {
-            System.out.println("Something is wrong with your file.");
+        //while word is not null add the word into the lexicon
+        while ((word = br.readLine()) != null) {
+            lexicon.add(word.toUpperCase());
         }
-       loaded = true;
+    }
+    //if file doesn't open
+    catch(FileNotFoundException err) {
+        throw new IllegalArgumentException("could not find file");
+    }
+    //other errors
+    catch(Exception err) {
+        throw new IllegalArgumentException("something is wrong with your file");
+     } 
+     loaded = true;
    }
    
    /**
@@ -91,45 +95,29 @@ public class TheWords implements WordSearchGame {
     *     square.
     */
    public void setBoard(String[] letterArray) {
-        //check if lexicon is loaded
-        if (loaded == false) {
-            throw new IllegalStateException();
-        }
-       //variable for the square root of the length
-       double rt = Math.sqrt(letterArray.length);
-
-       //check if it is null or a square
-       if (letterArray == null && rt % 1 != 0) {
+       if (letterArray == null) {
            throw new IllegalArgumentException("array is either null or not square");
-       }
-
-       //setting rows and cols for 2d array
-       rows = (int) rt;
-       cols = (int) rt;
-
-       //setting board dimensions
-       board = new String[rows][cols];
-       visited = new boolean[rows][cols];
-
-       //add letter array to the board
-       int x = 0;
-       int y = 0;
-
-       for (int i = 0; i < letterArray.length - 1; i++) {
-           //if x isn't at the last column then add it to that row
-           while (x <= cols - 1) {
-               //check if x is at the last column. 
-               //if it is, set it back to 0 and increment the row
-               if (x == cols - 1) {
-                   x = 0;
-                   y++;
-               }
-               //add the current letter to the current index of the board
-               board[y][x] = letterArray[i];
-               x++;
-           }
-           visited[y][x] = false;
-       }
+        }
+        //variable for sqrt of length
+        double rt = Math.sqrt(letterArray.length);
+        if (rt % 1 != 0) {
+            throw new IllegalArgumentException("array size must be square");
+        }
+        if (loaded == false) {
+            throw new IllegalStateException("lexicon not loaded");
+        }
+    
+        length = (int) rt;
+        board = new String[length][length];
+        visited = new boolean[length][length];
+        int curLetter = 0;
+        //set board
+        for (int x = 0; x < length; x++) {
+            for (int y = 0; y < length; y++) {
+                board[x][y] = letterArray[curLetter].toUpperCase();
+                curLetter++;
+            }
+        }
    }
    
    /**
@@ -138,24 +126,62 @@ public class TheWords implements WordSearchGame {
     *   implementing classes should have a default board.
     */
    public String getBoard() {
-       //string to hold the string representation of the board
-       String result;
+      String strBoard = "";
+      return strBoard;
+   }
 
-       //make sure lexicon has been loaded
-       if (loaded == false) {
-            throw new IllegalStateException();
-        }
+      
+   /**
+    * Determines if the given word is in the lexicon.
+    * 
+    * @param wordToCheck The word to validate
+    * @return true if wordToCheck appears in lexicon, false otherwise.
+    * @throws IllegalArgumentException if wordToCheck is null.
+    * @throws IllegalStateException if loadLexicon has not been called.
+    */
+    public boolean isValidWord(String wordToCheck) {
+      //check if word is null
+      if (wordToCheck == null) {
+         throw new IllegalArgumentException("word cannot be null");
+      }
+      //check if loaded
+      if (loaded == false) {
+         throw new IllegalStateException("lexicon is not loaded");
+      }
 
-        //create the string representation of the board
-        String lineSeperator = new System.lineSeperator();
-        StringBuilder sb = new StringBuilder();
+    //set the input string to uppercase
+    wordToCheck = wordToCheck.toUpperCase();
 
-        for (String[] row : board) {
-            sb.append(Arrays.toString(row)).append(lineSeperator);
-        }
-        result = sb.toString();
-        //return the board
-       return result;
+    //look for the word.
+    return lexicon.contains(wordToCheck);
+   }
+   
+   /**
+    * Determines if there is at least one word in the lexicon with the 
+    * given prefix.
+    * 
+    * @param prefixToCheck The prefix to validate
+    * @return true if prefixToCheck appears in lexicon, false otherwise.
+    * @throws IllegalArgumentException if prefixToCheck is null.
+    * @throws IllegalStateException if loadLexicon has not been called.
+    */
+   public boolean isValidPrefix(String prefixToCheck) {
+      //check if prefixToCheck is null
+      if (prefixToCheck == null) {
+        throw new IllegalArgumentException("prefix cannot be null");
+      }
+      //check if loaded
+      if (loaded == false) {
+         throw new IllegalStateException("lexicon not loaded");
+      }
+      //variable to hold the lexicon ceiling
+      String preFix = lexicon.ceiling(prefixToCheck);
+
+      //check if equal
+      if (preFix == prefixToCheck) {
+         return true;
+      }
+      return false;
    }
    
    /**
@@ -170,9 +196,36 @@ public class TheWords implements WordSearchGame {
     * @throws IllegalStateException if loadLexicon has not been called.
     */
    public SortedSet<String> getAllValidWords(int minimumWordLength) {
-       return minimumWordLength;
+      //check if word length is valid
+      if (minimumWordLength < 1) {
+         throw new IllegalArgumentException("invalid word length");
+      }
+      //check if loaded
+      if (loaded == false) {
+         throw new IllegalStateException("lexicon not loaded");
+      }
+      //create new list and sets for positionPath and allValidWords
+      positionPath = new ArrayList<Position>(); 
+      allValidWords = new TreeSet<String>();
+      wordSoFar = "";
+      //look for words on board
+      for (int i = 0; i < length; i++) {
+         for (int j = 0; j < length; j ++) {
+            wordSoFar = board[i][j];
+            if (isValidWord(wordSoFar) && wordSoFar.length() >= minimumWordLength) {
+               allValidWords.add(wordSoFar);
+            }
+            if (isValidPrefix(wordSoFar)) {
+               Position p = new Position(i,j);
+               positionPath.add(p);
+               dfsAllValidWords(i, j, minimumWordLength); 
+               positionPath.remove(p);
+            }
+         }
+      }
+      return allValidWords;
    }
-   
+
   /**
    * Computes the cummulative score for the scorable words in the given set.
    * To be scorable, a word must (1) have at least the minimum number of characters,
@@ -187,39 +240,30 @@ public class TheWords implements WordSearchGame {
    * @throws IllegalStateException if loadLexicon has not been called.
    */  
    public int getScoreForWords(SortedSet<String> words, int minimumWordLength) {
-       return 0;
+      if (minimumWordLength < 1) {
+         throw new IllegalArgumentException();
+      }
+      if (loaded == false) {
+         throw new IllegalStateException();
+      }
+      score = 0;
+      Iterator<String> i = words.iterator();
+      while (i.hasNext()) {
+         String word = i.next();
+         if (word.length() >= minimumWordLength && isValidWord(word)
+             && !isOnBoard(word).isEmpty()) {
+            score += (word.length() - minimumWordLength) + 1;
+         }
+      }
+      return score;
    }
-   
-   /**
-    * Determines if the given word is in the lexicon.
-    * 
-    * @param wordToCheck The word to validate
-    * @return true if wordToCheck appears in lexicon, false otherwise.
-    * @throws IllegalArgumentException if wordToCheck is null.
-    * @throws IllegalStateException if loadLexicon has not been called.
-    */
-   public boolean isValidWord(String wordToCheck) {
-       return false;
-   }
-   
-   /**
-    * Determines if there is at least one word in the lexicon with the 
-    * given prefix.
-    * 
-    * @param prefixToCheck The prefix to validate
-    * @return true if prefixToCheck appears in lexicon, false otherwise.
-    * @throws IllegalArgumentException if prefixToCheck is null.
-    * @throws IllegalStateException if loadLexicon has not been called.
-    */
-   public boolean isValidPrefix(String prefixToCheck) {
-       return false;
-   }
+
       
    /**
     * Determines if the given word is in on the game board. If so, it returns
-    * the path that makes up the word.
+    * the thePath that makes up the word.
     * @param wordToCheck The word to validate
-    * @return java.util.List containing java.lang.Integer objects with  the path
+    * @return java.util.List containing java.lang.Integer objects with  the thePath
     *     that makes up the word on the game board. If word is not on the game
     *     board, return an empty list. Positions on the board are numbered from zero
     *     top to bottom, left to right (i.e., in row-major order). Thus, on an NxN
@@ -229,7 +273,190 @@ public class TheWords implements WordSearchGame {
     * @throws IllegalStateException if loadLexicon has not been called.
     */
    public List<Integer> isOnBoard(String wordToCheck) {
-       List copy = new List();
-       return copy;
+      if (wordToCheck == null) {
+         throw new IllegalArgumentException("word cannot be null");
+      }
+      if (loaded == false) {
+         throw new IllegalStateException("lexicon not loaded");
+      }
+      positionPath = new ArrayList<Position>();
+      wordToCheck = wordToCheck.toUpperCase();
+      wordSoFar = "";
+      thePath = new ArrayList<Integer>();
+      //search for the word
+      for (int i = 0; i < length; i++) {
+         for (int j = 0; j < length; j++) {
+            if (wordToCheck.equals(board[i][j])) {
+               thePath.add(i * length + j); 
+               return thePath;
+            }
+            if (wordToCheck.startsWith(board[i][j])) {
+               Position pos = new Position(i, j);
+               positionPath.add(pos); 
+               wordSoFar = board[i][j]; 
+               dfsOneWord(i, j, wordToCheck); 
+               if (!wordToCheck.equals(wordSoFar)) {
+                  positionPath.remove(pos);
+               }
+               else {
+                  for (Position p: positionPath) {
+                     thePath.add((p.x * length) + p.y);
+                  } 
+                  return thePath;
+               }
+            }
+         }
+      }
+      return thePath;
    }
+   
+   /**
+   * DFS implementation
+   * @param x the x value on the board
+   * @param y the y value on the board
+   * @param wordToCheck the word we lookin for
+   */
+   private void dfsOneWord(int x, int y, String wordToCheck) {
+      Position pos = new Position(x, y);
+      unvisitAll(); 
+      visitPath(); 
+      //implement DFS recursively
+      for (Position p: pos.neighbors()) {
+         if (!isVisited(p)) {
+            visit(p);
+            if (wordToCheck.startsWith(wordSoFar + board[p.x][p.y])) {
+               wordSoFar += board[p.x][p.y];
+               positionPath.add(p);
+               dfsOneWord(p.x, p.y, wordToCheck);
+               if (wordToCheck.equals(wordSoFar)) {
+                  return;
+               }
+               else {
+                  //backtrack
+                  positionPath.remove(p);
+                  int last = wordSoFar.length() - board[p.x][p.y].length();
+                  wordSoFar = wordSoFar.substring(0, last);
+               }
+            }
+         }
+      }
+      unvisitAll(); 
+      visitPath(); 
+   }
+
+   /**
+    * dfs for getAllValidWords method
+    */
+   public void dfsAllValidWords(int x, int y, int min) {
+      Position pos = new Position(x, y);
+      unvisitAll();
+      visitPath(); 
+      for (Position p : pos.neighbors()) {
+         if (!isVisited(p)) {
+            visit(p);
+            if (isValidPrefix(wordSoFar + board[p.x][p.y])) {
+               wordSoFar += board[p.x][p.y];
+               positionPath.add(p);
+               if (isValidWord(wordSoFar) && wordSoFar.length() >= min) {
+                  allValidWords.add(wordSoFar);
+               }
+               //backtrack
+               dfsAllValidWords(p.x, p.y, min);
+               positionPath.remove(p);
+               int last = wordSoFar.length() - board[p.x][p.y].length();
+               wordSoFar = wordSoFar.substring(0, last);
+            }
+         }
+      }
+      unvisitAll(); 
+      visitPath(); 
+   }
+
+   /**
+   * sets everything to unvisited
+   */
+   private void unvisitAll() {
+      visited = new boolean[length][length];
+      for (boolean[] row : visited) {
+         Arrays.fill(row, false);
+      }
+   }
+   
+   /**
+   * marks the path for the word as visited
+   */
+   private void visitPath() {
+      for (int i = 0; i < positionPath.size(); i ++) {
+         visit(positionPath.get(i));
+      }
+   }
+   
+
+   ///////////////////////////////////////////
+   // Position class and associated methods //
+   ///////////////////////////////////////////
+
+   /**
+    * Models an (x,y) position in the grid.
+    */
+   private class Position {
+      int x;
+      int y;
+   
+      /** Constructs a Position with coordinates (x,y). */
+      public Position(int x, int y) {
+         this.x = x;
+         this.y = y;
+      }
+   
+      /** Returns a string representation of this Position. */
+      @Override
+      public String toString() {
+         return "(" + x + ", " + y + ")";
+      }
+   
+      /** Returns all the neighbors of this Position. */
+      public Position[] neighbors() {
+         Position[] nbrs = new Position[MAX_NEIGHBORS];
+         int count = 0;
+         Position p;
+         // generate all eight neighbor positions
+         // add to return value if valid
+         for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+               if (!((i == 0) && (j == 0))) {
+                  p = new Position(x + i, y + j);
+                  if (isValid(p)) {
+                     nbrs[count++] = p;
+                  }
+               }
+            }
+         }
+         return Arrays.copyOf(nbrs, count);
+      }
+   }
+
+   /**
+    * checks if a position is valid.
+    * @param p the position
+    */
+   private boolean isValid(Position p) {
+      return (p.x >= 0) && (p.x < length) && (p.y >= 0) && (p.y < length);
+   }
+
+   /**
+    * Checks if a position has been visited.
+    * @param p the position
+    */
+   private boolean isVisited(Position p) {
+      return visited[p.x][p.y];
+   }
+
+   /**
+    * Mark this valid position as having been visited.
+    */
+   private void visit(Position p) {
+      visited[p.x][p.y] = true;
+   }
+
 }
