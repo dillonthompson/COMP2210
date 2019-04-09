@@ -3,6 +3,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -12,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TreeSet;
+import java.util.Queue;
 
 import java.util.stream.Collectors;
 
@@ -35,6 +38,7 @@ public class Doublets implements WordLadderGame {
     /////////////////////////////////////////////////////////////////////////////
 
     private HashSet<String> lexicon;
+    private HashSet<String> visited;
 
     /**
      * Instantiates a new instance of Doublets with the lexicon populated with
@@ -117,8 +121,33 @@ public class Doublets implements WordLadderGame {
     * @return        a minimum length word ladder from start to end
     */
     public List<String> getMinLadder(String start, String end) {
-        List<String> lad = new ArrayList<String>();
-        return lad;
+        return bfs(start, end);
+    }
+
+    public List<String> bfs(String start, String end) {
+        visited = new HashSet<String>();
+        Queue<Node> q = new LinkedList<Node>();
+        List<String> nbrs = new ArrayList<String>();
+        q.add(new Node(start, null));
+        while (!q.isEmpty()) {
+            Node temp = q.remove();
+            if (temp.word.equals(end)) {
+                while (temp.n != null) {
+                    nbrs.add(temp.word);
+                    temp = temp.n;
+                }
+                nbrs.add(start);
+                Collections.reverse(nbrs);
+                return nbrs;
+            }
+            for (String i : getNeighbors(temp.word)) {
+                if (!visited.contains(i)) {
+                    visited.add(i);
+                }
+                q.add(new Node(i, temp));
+            }
+        }
+        return nbrs;
     }
 
 
@@ -140,7 +169,7 @@ public class Doublets implements WordLadderGame {
         for (int i = 0; i < word.length(); i++) {
             for (char j = 'a'; j <= 'z'; j++) {
                 String cop = word.replace(word.charAt(i), j);
-                if (isWord(cop) && !nbrs.contains(cop)) {
+                if (isWord(cop) && getHammingDistance(word, cop) == 1) {
                     nbrs.add(cop);
                 }
             }
@@ -198,6 +227,15 @@ public class Doublets implements WordLadderGame {
             }
         }        
         return true;
+    }
+
+    public class Node {
+        String word;
+        Node n;
+        public Node(String str, Node node) {
+            word = str;
+            n = node;
+        }
     }
 
 }

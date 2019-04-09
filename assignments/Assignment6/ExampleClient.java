@@ -37,9 +37,9 @@ public class ExampleClient {
         System.out.println(doublets.isWordLadder(Arrays.asList("cat", "cot", "zot", "dot")));
         System.out.println(doublets.isWordLadder(Arrays.asList("cat", "cot", "pot", "dot")));
 
-        System.out.println(doublets.getNeighbors("tiger"));
+        System.out.println(doublets.getNeighbors("cat"));
 
-        System.out.println(doublets.getMinLadder("cat", "hat"));
+        System.out.println(doublets.getMinLadder("aa", "aa"));
     }
 }
 
