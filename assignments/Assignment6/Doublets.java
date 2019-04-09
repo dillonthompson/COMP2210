@@ -7,6 +7,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -189,7 +190,14 @@ public class Doublets implements WordLadderGame {
      *                       false otherwise
      */
     public boolean isWordLadder(List<String> sequence) {
-        return false;
+        for (int i = 0; i < sequence.size() - 1; i++) {
+            String curr = sequence.get(i);
+            String nxt = sequence.get(i + 1);
+            if (!isWord(curr) || !isWord(nxt) || getHammingDistance(curr, nxt) > 1) {
+                return false;
+            }
+        }        
+        return true;
     }
 
 }
