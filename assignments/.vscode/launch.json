@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ExampleClient",
+            "request": "launch",
+            "mainClass": "ExampleClient",
+            "projectName": "assignments_d0b8aaac"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - ExampleGameClient",
             "request": "launch",
             "mainClass": "ExampleGameClient"
