@@ -3,6 +3,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.util.Collections;
+import java.util.Deque;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -91,9 +93,7 @@ public class Doublets implements WordLadderGame {
         //check for hamming distance
         int count = 0;
         for (int i = 0; i < str1.length(); i++) {
-            // System.out.println(str1.charAt(i));
             if (str1.charAt(i) != str2.charAt(i)) {
-                // System.out.println(str1.charAt(i));
                 count++;
             }
         }
@@ -114,33 +114,34 @@ public class Doublets implements WordLadderGame {
     * @return        a minimum length word ladder from start to end
     */
     public List<String> getMinLadder(String start, String end) {
+        visited = new HashSet<String>();
         return bfs(start, end);
     }
 
     public List<String> bfs(String start, String end) {
-        visited = new HashSet<String>();
-        Queue<Node> q = new LinkedList<Node>();
-        List<String> nbrs = new ArrayList<String>();
-        q.add(new Node(start, null));
+        Deque<Node> q = new ArrayDeque<>();
+        List<String> neighbors = new ArrayList<String>();
+        q.addLast(new Node(start, null));
         while (!q.isEmpty()) {
-            Node temp = q.remove();
+            Node temp = q.removeFirst();
             if (temp.word.equals(end)) {
-                while (temp.n != null) {
-                    nbrs.add(temp.word);
-                    temp = temp.n;
+                Node temp2 = temp;
+                while (temp2.n != null) {
+                    neighbors.add(temp2.word);
+                    temp2 = temp2.n;
                 }
-                nbrs.add(start);
-                Collections.reverse(nbrs);
-                return nbrs;
+                neighbors.add(start);
+                Collections.reverse(neighbors);
+                return neighbors;
             }
             for (String i : getNeighbors(temp.word)) {
                 if (!visited.contains(i)) {
                     visited.add(i);
+                    q.addLast(new Node(i, temp));
                 }
-                q.add(new Node(i, temp));
             }
         }
-        return nbrs;
+        return neighbors;
     }
 
 
@@ -158,12 +159,12 @@ public class Doublets implements WordLadderGame {
         if (word == null) {
             throw new IllegalArgumentException("word cannot be null");
         }
-        //get the nbrs
         for (int i = 0; i < word.length(); i++) {
             for (char j = 'a'; j <= 'z'; j++) {
-                String cop = word.replace(word.charAt(i), j);
-                if (isWord(cop) && getHammingDistance(word, cop) == 1) {
-                    nbrs.add(cop);
+                StringBuilder cop = new StringBuilder(word);
+                cop.setCharAt(i, j);
+                if (isWord(cop.toString()) && getHammingDistance(word, cop.toString()) == 1) {
+                    nbrs.add(cop.toString());
                 }
             }
         }
@@ -212,10 +213,13 @@ public class Doublets implements WordLadderGame {
      *                       false otherwise
      */
     public boolean isWordLadder(List<String> sequence) {
+        if (sequence.isEmpty()) {
+            return false;
+        }
         for (int i = 0; i < sequence.size() - 1; i++) {
             String curr = sequence.get(i);
             String nxt = sequence.get(i + 1);
-            if (!isWord(curr) || !isWord(nxt) || getHammingDistance(curr, nxt) > 1) {
+            if (!isWord(curr) || !isWord(nxt) || getHammingDistance(curr, nxt) != 1) {
                 return false;
             }
         }        

@@ -39,7 +39,7 @@ public class ExampleClient {
 
         System.out.println(doublets.getNeighbors("cat"));
 
-        System.out.println(doublets.getMinLadder("aa", "aa"));
+        System.out.println(doublets.getMinLadder("charge", "comedo"));
     }
 }
 
